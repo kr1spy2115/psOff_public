@@ -8,8 +8,6 @@
 
 LOG_DEFINE_MODULE(mspace);
 
-// todo use vmaVirtualAllocate for this!
-
 namespace {
 struct MSpaceData {
   boost::simple_segregated_storage<std::size_t> storage;

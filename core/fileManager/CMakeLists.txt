@@ -6,7 +6,6 @@ add_library(fileManager OBJECT
   types/type_null.cpp
   types/type_file.cpp
   types/type_random.cpp
-  types/type_rng.cpp
 )
 
 add_dependencies(fileManager third_party psOff_utility)
