@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS_RELEASE "/MD /Zi /GS- /GF /Gy /GR /Oi -Ofast -fno-strict-aliasing")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG /OPT:REF,ICF")
-set(CMAKE_INSTALL_MESSAGE LAZY)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(CMAKE_WINDOWS_SYMBOL_VISIBILITY_IN_STATIC_LIBRARIES OFF)
@@ -41,7 +40,6 @@ include_directories(BEFORE
   ${PRJ_SRC_DIR}/modules_include
   ${PRJ_SRC_DIR}/tools/logging
   ${PRJ_SRC_DIR}/tools/config_emu
-  ${PRJ_SRC_DIR}/tools/gamereport
   ${PRJ_SRC_DIR}
   ${CMAKE_BINARY_DIR}/third_party/install/include
 )
@@ -54,16 +52,9 @@ link_directories(BEFORE
 )
 
 add_subdirectory(tools/logging) # include before link_libraries
-add_subdirectory(tools/config_emu)
-add_subdirectory(tools/gamereport)
+add_subdirectory(tools/config_emu) # include before link_libraries
 add_subdirectory(tools/dll2Nids)
 add_dependencies(dll2Nids third_party)
-
-set(TEST_BENCH OFF CACHE BOOL "Enable testing")
-
-if(TEST_BENCH)
-  add_subdirectory(tests)
-endif()
 
 link_libraries(
   logging.lib

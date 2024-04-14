@@ -19,7 +19,6 @@ constexpr std::array requiredExtensions {
     VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME, VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME, VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
     VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME, VK_EXT_DEPTH_CLIP_CONTROL_EXTENSION_NAME, VK_KHR_SAMPLER_MIRROR_CLAMP_TO_EDGE_EXTENSION_NAME,
     VK_EXT_DEPTH_RANGE_UNRESTRICTED_EXTENSION_NAME, VK_EXT_SEPARATE_STENCIL_USAGE_EXTENSION_NAME, VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
-    VK_EXT_PROVOKING_VERTEX_EXTENSION_NAME,
     // VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
     VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME, "VK_KHR_external_memory_win32"};
 
@@ -384,14 +383,9 @@ void findPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, SurfaceCapabi
     VkPhysicalDeviceDescriptorIndexingFeatures indexingFeature {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT,
                                                                 .pNext = &shaderObj};
 
-    VkPhysicalDeviceProvokingVertexFeaturesEXT provVertex {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROVOKING_VERTEX_FEATURES_EXT,
-        .pNext = &descIndexing,
-    };
-
     VkPhysicalDeviceColorWriteEnableFeaturesEXT colorWriteExt {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COLOR_WRITE_ENABLE_FEATURES_EXT,
-        .pNext = &provVertex,
+        .pNext = &indexingFeature,
     };
 
     VkPhysicalDeviceFeatures2 deviceFeatures {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, .pNext = &colorWriteExt};
@@ -406,10 +400,10 @@ void findPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, SurfaceCapabi
     auto qs = findQueues(device, surface);
     dumpQueues(qs);
 
-    // if (shaderObj.shaderObject == VK_FALSE) {
-    //   LOG_ERR(L"shaderObject is not supported");
-    //   skipDevice = true;
-    // }
+    if (shaderObj.shaderObject == VK_FALSE) {
+      LOG_ERR(L"shaderObject is not supported");
+      skipDevice = true;
+    }
 
     if (qs.graphics.empty() || qs.compute.empty() || qs.transfer.empty() || qs.present.empty()) {
       LOG_ERR(L"Not enough queues");
@@ -418,11 +412,6 @@ void findPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, SurfaceCapabi
 
     if (colorWriteExt.colorWriteEnable != VK_TRUE) {
       LOG_ERR(L"colorWriteEnable is not supported");
-      skipDevice = true;
-    }
-
-    if (provVertex.provokingVertexLast != VK_TRUE) {
-      LOG_ERR(L"provokingVertexLast is not supported");
       skipDevice = true;
     }
 
@@ -632,7 +621,7 @@ VkDevice createDevice(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, Vul
       //.bufferDeviceAddressCaptureReplay = enableValidation ? VK_TRUE : VK_FALSE,
   };
 
-  VkPhysicalDeviceDescriptorIndexingFeatures descIndexing {
+  VkPhysicalDeviceDescriptorIndexingFeatures const descIndexing {
       .sType                                         = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES,
       .pNext                                         = &bufferDeviceAddress,
       .descriptorBindingUniformBufferUpdateAfterBind = VK_FALSE, // Todo: only optional!
@@ -644,15 +633,9 @@ VkDevice createDevice(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, Vul
       .runtimeDescriptorArray                        = VK_TRUE,
   };
 
-  VkPhysicalDeviceProvokingVertexFeaturesEXT provVertex {
-      .sType               = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROVOKING_VERTEX_FEATURES_EXT,
-      .pNext               = &descIndexing,
-      .provokingVertexLast = VK_TRUE,
-  };
-
   VkDeviceCreateInfo const createInfo {
       .sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-      .pNext                   = &provVertex,
+      .pNext                   = &descIndexing,
       .flags                   = 0,
       .queueCreateInfoCount    = numQueueCreateInfo,
       .pQueueCreateInfos       = queueCreateInfo.data(),
@@ -750,20 +733,6 @@ VulkanObj* initVulkan(SDL_Window* window, VkSurfaceKHR& surface, bool enableVali
                     VK_API_VERSION_MINOR(g_PhysicalDeviceProperties.apiVersion), VK_API_VERSION_PATCH(g_PhysicalDeviceProperties.apiVersion));
     printf("%s\n", text.data());
     LOG_INFO(L"%S", text.data());
-
-    // Debug infos
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(obj->deviceInfo.physicalDevice, &memProperties);
-
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
-      LOG_DEBUG(L"%u| Memory Type: index:%u flags:%S", i, memProperties.memoryTypes[i].heapIndex,
-                string_VkMemoryPropertyFlags(memProperties.memoryTypes[i].propertyFlags).data());
-    }
-    for (uint32_t i = 0; i < memProperties.memoryHeapCount; i++) {
-      LOG_DEBUG(L"%u| Memory Heap: size:%u flags:%S", i, memProperties.memoryHeaps[i].size,
-                string_VkMemoryHeapFlags(memProperties.memoryHeaps[i].flags).data());
-    }
-    // -
   }
 
   obj->deviceInfo.device = createDevice(obj->deviceInfo.physicalDevice, surface, extensions, queues, enableValidation);

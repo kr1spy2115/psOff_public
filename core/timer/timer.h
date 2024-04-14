@@ -95,12 +95,6 @@ class ITimer {
    * @return int getErr()
    */
   virtual int getTimeofDay(SceKernelTimeval* tp) = 0;
-
-  /**
-   * @brief Get the time zone info
-   *
-   */
-  virtual int getTimeZone(SceKernelTimezone* tz) = 0;
 };
 
 #if defined(__APICALL_EXTERN)

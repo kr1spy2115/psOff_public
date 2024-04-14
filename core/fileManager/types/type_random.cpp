@@ -9,10 +9,8 @@ class TypeRandom: public IFile {
   // ### Interface
   size_t  read(void* buf, size_t nbytes) final;
   size_t  write(void* buf, size_t nbytes) final;
-  void    sync() final;
-  int     ioctl(int request, SceVariadicList argp) final;
-  int     fcntl(int cmd, SceVariadicList argp) final;
   int64_t lseek(int64_t offset, SceWhence whence) final;
+  void    sync() final;
 
   void* getNative() final { return nullptr; }
 };
@@ -35,16 +33,8 @@ size_t TypeRandom::write(void* buf, size_t nbytes) {
   return 0;
 }
 
-void TypeRandom::sync() {}
-
-int TypeRandom::ioctl(int request, SceVariadicList argp) {
-  return 0;
-}
-
-int TypeRandom::fcntl(int cmd, SceVariadicList argp) {
-  return 0;
-}
-
 int64_t TypeRandom::lseek(int64_t offset, SceWhence whence) {
   return -1;
 }
+
+void TypeRandom::sync() {}

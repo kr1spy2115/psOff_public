@@ -34,7 +34,6 @@
     "third_party/boost",
     "third_party/optick",
     "third_party/magic_enum",
-    "third_party/SDL2",
-    "third_party/libpng"
+    "third_part/SDL2"
   ]
 }

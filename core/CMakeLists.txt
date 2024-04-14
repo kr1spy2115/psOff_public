@@ -29,16 +29,14 @@ add_library(core SHARED
   $<TARGET_OBJECTS:unwinding>
 )
 
-add_dependencies(core logging boost config_emu gamereport)
+add_dependencies(core logging boost)
 target_link_libraries(core PRIVATE
   libboost_thread
   libboost_chrono
   libboost_program_options
   sdl2
-  gamereport.lib
   OptickCore
   psOff_utility
-  config_emu.lib
   ${Vulkan_LIBRARIES}
 )
 
