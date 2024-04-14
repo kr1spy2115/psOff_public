@@ -38,7 +38,8 @@ NT_TIB* getTIB() {
 
 struct PImpl {
   boost::mutex mutex;
-  PImpl() = default;
+  DWORD        pageSize = 0;
+  PImpl()               = default;
 };
 
 PImpl* getData() {
@@ -95,13 +96,17 @@ size_t mutexCounter() {
 void initTLS(ScePthread_obj obj) {
   auto pthread    = getPthread(obj);
   pthread->dtv[0] = 0;
-  std::fill(&pthread->dtv[1], &pthread->dtv[DTV_SIZE - 2], 0); // skip mainprog
+  std::fill(&pthread->dtv[2], &pthread->dtv[DTV_SIZE - 2], 0); // skip mainprog
   pthread->dtv[DTV_SIZE - 1] = XSAVE_CHK_GUARD;
   accessRuntimeExport()->initTLS(obj); // reset tls
 }
 
 void init_pThread() {
-  auto pimpl = getData();
+  SYSTEM_INFO sSysInfo;
+  GetSystemInfo(&sSysInfo); // Initialize the structure.
+
+  auto pimpl      = getData();
+  pimpl->pageSize = sSysInfo.dwPageSize;
 }
 } // namespace
 
@@ -880,16 +885,6 @@ int mutexattrGetprotocol(ScePthreadMutexattr* attr, int* protocol) {
 
 int mutexattrSetprotocol(ScePthreadMutexattr* attr, int protocol) {
   (*attr)->pprotocol = (SceMutexProtocol)protocol;
-  return Ok;
-}
-
-int mutexattrGetpshared(ScePthreadMutexattr* attr, int* pshared) {
-  *pshared = (int)(*attr)->pshared;
-  return Ok;
-}
-
-int mutexattrSetpshared(ScePthreadMutexattr* attr, int pshared) {
-  (*attr)->pshared = (SceMutexShared)pshared;
   return Ok;
 }
 

@@ -1,7 +1,6 @@
-cmake_minimum_required(VERSION 3.24)
+set(libName libSceNpTookit2)
 include(../setupModule.cmake)
 
-set(libName libSceSystemServicePs2Emu)
 project(${libName})
 
 add_library(${libName} SHARED entry.cpp)

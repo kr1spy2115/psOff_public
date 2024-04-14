@@ -1,5 +1,3 @@
-#include "boost/date_time/posix_time/posix_time_types.hpp"
-#include "boost/interprocess/sync/interprocess_semaphore.hpp"
 #include "common.h"
 #include "core/kernel/errors.h"
 #include "core/kernel/semaphore.h"
@@ -9,7 +7,6 @@
 
 #include <boost/chrono.hpp>
 #include <boost/thread.hpp>
-
 LOG_DEFINE_MODULE(libScePosix);
 
 using ScePthreadSem_t = ISemaphore*;
@@ -18,12 +15,12 @@ extern "C" {
 
 EXPORT const char* MODULE_NAME = "libkernel";
 
-EXPORT SYSV_ABI int __NID(sem_init)(boost::interprocess::interprocess_semaphore** sem, int pshared, unsigned int value) {
-  *sem = new boost::interprocess::interprocess_semaphore(value);
+EXPORT SYSV_ABI int __NID(sem_init)(ScePthreadSem_t* sem, int pshared, unsigned int value) {
+  (*sem) = createSemaphore(nullptr, false, 0, std::numeric_limits<int>::max()).release();
   return Ok;
 }
 
-EXPORT SYSV_ABI int __NID(sem_destroy)(boost::interprocess::interprocess_semaphore** sem) {
+EXPORT SYSV_ABI int __NID(sem_destroy)(ScePthreadSem_t* sem) {
   if (sem == nullptr) {
     return POSIX_SET(ErrCode::_ESRCH);
   }
@@ -32,29 +29,27 @@ EXPORT SYSV_ABI int __NID(sem_destroy)(boost::interprocess::interprocess_semapho
   return Ok;
 }
 
-EXPORT SYSV_ABI int __NID(sem_post)(boost::interprocess::interprocess_semaphore** sem) {
+EXPORT SYSV_ABI int __NID(sem_post)(ScePthreadSem_t* sem) {
   if (sem == nullptr || *sem == nullptr) {
     return POSIX_SET(ErrCode::_ESRCH);
   }
-  (*sem)->post();
-  return Ok;
+  return POSIX_CALL((*sem)->signal(1));
 }
 
 // EXPORT SYSV_ABI int sem_reltimedwait_np(ScePthreadSem_t*sem, useconds_t);
-EXPORT SYSV_ABI int __NID(sem_trywait)(boost::interprocess::interprocess_semaphore** sem) {
+EXPORT SYSV_ABI int __NID(sem_trywait)(ScePthreadSem_t* sem) {
   if (sem == nullptr || *sem == nullptr) {
     return POSIX_SET(ErrCode::_ESRCH);
   }
-  return (*sem)->try_wait() ? Ok : POSIX_SET(ErrCode::_EBUSY);
+  return POSIX_CALL((*sem)->try_wait(1, nullptr));
 }
 
 // EXPORT SYSV_ABI int sem_unlink(const char* semName){}
-EXPORT SYSV_ABI int __NID(sem_wait)(boost::interprocess::interprocess_semaphore** sem) {
+EXPORT SYSV_ABI int __NID(sem_wait)(ScePthreadSem_t* sem) {
   if (sem == nullptr || *sem == nullptr) {
     return POSIX_SET(ErrCode::_ESRCH);
   }
-  (*sem)->wait();
-  return Ok;
+  return POSIX_CALL((*sem)->wait(1, nullptr));
 }
 
 EXPORT SYSV_ABI unsigned int __NID(sleep)(unsigned int seconds) {

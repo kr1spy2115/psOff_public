@@ -3,7 +3,6 @@
 
 constexpr int        Ok = 0;
 typedef unsigned int SceKernelUseconds;
-typedef void*        SceVariadicList;
 
 struct timeval64 {
   uint64_t tv_sec;
@@ -17,11 +16,6 @@ struct timespec64 {
 
 typedef struct timeval64  SceKernelTimeval;
 typedef struct timespec64 SceKernelTimespec;
-
-struct SceKernelTimezone {
-  int tz_minuteswest;
-  int tz_dsttime;
-};
 
 struct SceRtcTick {
   uint64_t tick;

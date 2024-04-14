@@ -60,5 +60,3 @@ enum class SceSystemServiceGpuLoadEmulationMode {
   NORMAL,
   HIGH,
 };
-
-constexpr int32_t SCE_SYSTEM_SERVICE_MAX_SYSTEM_NAME_LENGTH = 65;

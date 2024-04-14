@@ -107,6 +107,6 @@ struct SceNetMemoryPoolStats {
   size_t currentInuseSize;
 };
 
-struct SceNetEtherAddr {
+typedef struct SceNetEtherAddr {
   uint8_t data[SCE_NET_ETHER_ADDR_LEN];
-};
+} SceNetEtherAddr;

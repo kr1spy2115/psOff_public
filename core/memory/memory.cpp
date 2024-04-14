@@ -69,7 +69,9 @@ VirtualAlloc2_func_t getVirtualAlloc2() {
 
 namespace memory {
 int getpagesize(void) {
-  return util::getPageSize();
+  SYSTEM_INFO si;
+  GetSystemInfo(&si);
+  return si.dwPageSize;
 }
 
 uint64_t getTotalSystemMemory() {

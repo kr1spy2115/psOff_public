@@ -18,18 +18,11 @@ enum class SceSaveDataSortKey : uint32_t { DIRNAME = 0, USER_PARAM = 1, BLOCKS =
 
 enum class SceSaveDataSortOrder : uint32_t { ASCENT = 0, DESCENT = 1 };
 
+enum class SceSaveDataMemoryOption : uint32_t { NONE = 0x00000000, SET_PARAM = 0x00000001, DOUBLE_BUFFER = 0x00000010 };
+
 enum class SceSaveDataMemorySyncOption : uint32_t { NONE = 0x00000000, BLOCKING = 0x00000001 << 0 };
 
 enum class SceSaveDataEventType : uint32_t { INVALID = 0, UMOUNT_BACKUP_END = 1, BACKUP_END = 2, SAVE_DATA_MEMORY_SYNC_END = 3 };
-
-union SceSaveDataMemoryOption {
-  struct {
-    uint32_t SET_PARAM     : 1;
-    uint32_t DOUBLE_BUFFER : 1;
-  } bits;
-
-  uint32_t bitfield;
-};
 
 /*
  * Structures
@@ -53,7 +46,7 @@ struct SceSaveDataFingerprint {
   char padding[15];
 };
 
-struct SceSaveDataInitParams3;
+typedef struct _SceSaveDataInitParams3 SceSaveDataInitParams3;
 
 struct SceSaveDataMount {
   int         userId;
@@ -161,7 +154,7 @@ struct SceSaveDataDirNameSearchResult {
 
 struct SceSaveDataMemorySync {
   int32_t                     userId;
-  uint32_t                    slotId; // Values: 0...3
+  uint32_t                    slotId;
   SceSaveDataMemorySyncOption option;
   uint8_t                     reserved[28];
 };
@@ -210,7 +203,7 @@ struct SceSaveDataMemorySetup2 {
   size_t                  iconMemorySize;
   const SceSaveDataParam* initParam;
   const SceSaveDataIcon*  initIcon;
-  uint32_t                slotId; // Values: 0...3
+  uint32_t                slotId;
   uint8_t                 reserved[20];
 };
 
@@ -225,7 +218,7 @@ struct SceSaveDataMemoryGet2 {
   SceSaveDataMemoryData* data;
   SceSaveDataParam*      param;
   SceSaveDataIcon*       icon;
-  uint32_t               slotId; // Values: 0...3
+  uint32_t               slotId;
   uint8_t                reserved[28];
 };
 
@@ -236,11 +229,11 @@ struct SceSaveDataMemorySet2 {
   const SceSaveDataParam*      param;
   const SceSaveDataIcon*       icon;
   uint32_t                     dataNum;
-  uint32_t                     slotId; // Values: 0...3
+  uint32_t                     slotId;
   uint8_t                      reserved[24];
 };
 
-struct SceSaveDataEventParam;
+typedef struct _SceSaveDataEventParam SceSaveDataEventParam;
 
 struct SceSaveDataEvent {
   SceSaveDataEventType type;
